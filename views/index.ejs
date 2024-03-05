@@ -135,6 +135,7 @@
 
       postData("/message", { input: questionInput.value })
         .then((data) => {
+          let resData = data;
           if (data.message) {
             let wrapper = qesAnsWrapper.lastElementChild.lastElementChild;
             let sppiner = wrapper.querySelector('.sppiner');
@@ -144,7 +145,7 @@
           }
           questionInput.value = null;
           submitBtn.classList.add('disabled');
-          displayResponse(data)
+          displayResponse(resData)
         });
     })
 
