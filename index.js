@@ -27,7 +27,7 @@ async function main(input) {
 }
 
 app.get('/', (req, res) => {
-  res.render('./public/index.html')
+  res.render('index')
 })
 
 app.get('/user', (req, res) => {
