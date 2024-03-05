@@ -38,9 +38,12 @@
   <div class="container d-flex flex-column align-items-center bg-transparent pt-4 px-2 pb-5 position-relative">
     <!-- Navbar  -->
     <div class="navbar col-12 col-lg-10 d-flex justify-content-between mb-5">
-      <div style="width: 170px;"><img src="https://res.cloudinary.com/dzqufw45x/image/upload/v1709628292/name-logo_sbuale.png" class="img-fluid" alt=""></div>
+      <div style="width: 170px;"><img
+          src="https://res.cloudinary.com/dzqufw45x/image/upload/v1709628292/name-logo_sbuale.png" class="img-fluid"
+          alt=""></div>
       <div class="btns ">
-        <button class="btn btn-success me-1 me-md-3 fw-semibold px-4 " style="color: rgba(255, 255, 255, 0.9);">Login</button>
+        <button class="btn btn-success me-1 me-md-3 fw-semibold px-4 "
+          style="color: rgba(255, 255, 255, 0.9);">Login</button>
         <button class="btn btn-danger fw-semibold px-4" style="color: rgba(255, 255, 255, 0.9);">Signup</button>
       </div>
     </div>
@@ -71,14 +74,14 @@
   <script>
 
     function scrollHandle() {
-        if (document.body.scrollHeight > (window.innerHeight - 400)) {
-          window.scrollTo({
-            top: document.body.scrollHeight,
-            left: 0,
-            behavior: 'smooth'
-          });
-        }
+      if (document.body.scrollHeight > (window.innerHeight - 400)) {
+        window.scrollTo({
+          top: document.body.scrollHeight,
+          left: 0,
+          behavior: 'smooth'
+        });
       }
+    }
 
     const submitBtn = document.querySelector('#submit-btn');
     let inputQues = document.querySelector('#formData textarea');
@@ -148,12 +151,19 @@
     async function displayResponse(data) {
       let response = data.message;
       const outputElement = document.querySelector('.qesAnsWrapper').lastElementChild.lastElementChild.lastElementChild;
+      let words = response.split(' ');
+      let index = 0;
 
-      for (const word of response) {
-        await new Promise(resolve => setTimeout(resolve, 2));
-        outputElement.textContent += word + '';
-        scrollHandle()
+      function printWord() {
+        if (index < words.length) {
+          outputElement.textContent += words[index] + ' ';
+          index++;
+          scrollHandle();
+        } else {
+          clearInterval(intervalId);
+        }
       }
+      let intervalId = setInterval(printWord, 50);
     }
 
   </script>
