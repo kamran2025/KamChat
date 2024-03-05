@@ -134,8 +134,8 @@
       window.scrollTo(0, (document.body.scrollHeight + 500));
 
       postData("/message", { input: questionInput.value })
-        .then((data) => {
-          let resData = data;
+        .then(async (data) => {
+          let resData = await data;
           if (data.message) {
             let wrapper = qesAnsWrapper.lastElementChild.lastElementChild;
             let sppiner = wrapper.querySelector('.sppiner');
