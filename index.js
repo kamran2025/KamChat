@@ -1,7 +1,9 @@
 import OpenAI from 'openai';
 import express from 'express'
+import dotenv from 'dotenv';
 import serveStatic from 'serve-static';
 
+dotenv.config();
 const app = express()
 const messages = []
 
