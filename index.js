@@ -26,6 +26,10 @@ app.get('/', (req, res) => {
   res.render('./public/index.html')
 })
 
+app.get('/user', (req, res) => {
+  res.send('This is a User Page')
+})
+
 app.post('/message', async function (req, res) {
   const mes = await main(req.body.input)
   res.json({success: true, message: mes})
