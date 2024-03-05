@@ -5,6 +5,7 @@ import serveStatic from 'serve-static';
 
 dotenv.config();
 const app = express()
+const PORT = process.env.PORT || 3000;
 const messages = []
 
 app.use(serveStatic('public'))
@@ -37,7 +38,6 @@ app.post('/message', async function (req, res) {
   res.json({success: true, message: mes})
 });
 
-const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Server is running on port http://localhost:${PORT}`);
 });
