@@ -1,14 +1,15 @@
 import OpenAI from 'openai';
 import express from 'express'
 import dotenv from 'dotenv';
-import serveStatic from 'serve-static';
+import path from 'path'
 
 dotenv.config();
 const app = express()
 const PORT = process.env.PORT || 3000;
 const messages = []
 
-app.use(serveStatic('public'))
+app.set('view engine', 'ejs')
+app.set('views', path.resolve('./views'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
