@@ -26,7 +26,7 @@ app.get('/', (req, res) => {
   res.render('./public/index.html')
 })
 
-app.post('/userquestion', async function (req, res) {
+app.post('/message', async function (req, res) {
   const mes = await main(req.body.input)
   res.json({success: true, message: mes})
 });

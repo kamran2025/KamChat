@@ -130,7 +130,7 @@
       qesAnsWrapper.appendChild(div);
       window.scrollTo(0, (document.body.scrollHeight + 500));
 
-      postData("/userquestion", { input: questionInput.value })
+      postData("/message", { input: questionInput.value })
         .then((data) => {
           if (data.message) {
             let wrapper = qesAnsWrapper.lastElementChild.lastElementChild;
