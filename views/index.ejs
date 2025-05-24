@@ -12,11 +12,12 @@
   <!-- Google font  -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap" rel="stylesheet">
+  <!-- <link href="https://fonts.googleapis.com/css2?family=Inconsolata:wght@200..900&display=swap" rel="stylesheet"> -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
     body {
-      font-family: "Inconsolata", monospace, sans-serif;
+      font-family: 'Inter', sans-serif;
     }
 
     .form-control {
@@ -31,6 +32,45 @@
     textarea::placeholder {
       color: rgba(255, 255, 255, 0.5) !important;
     }
+
+    .message-bubble {
+      padding: 10px 15px;
+      border-radius: 15px;
+      margin-bottom: 10px;
+      max-width: 70%;
+      word-wrap: break-word;
+    }
+
+    .user-message {
+      background-color: #007bff;
+      color: white;
+      margin-left: auto;
+      border-top-right-radius: 5px;
+    }
+
+    .bot-message {
+      background-color: #f0f0f0;
+      color: #333;
+      margin-right: auto;
+      border-top-left-radius: 5px;
+    }
+
+    .message-container {
+      margin-bottom: 15px; /* To space out user/bot message blocks */
+    }
+    
+    .time-stamp {
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
+
+    .bot-message pre {
+      font-family: 'Inter', sans-serif; /* Ensure font consistency */
+      white-space: pre-wrap; /* Ensures text wraps and respects newlines */
+      word-wrap: break-word; /* Additional safety for breaking long words */
+      margin: 0; /* Remove default pre margins */
+    }
+
   </style>
 </head>
 
@@ -111,47 +151,70 @@
 
     submitBtn.addEventListener('click', function (e) {
       e.preventDefault();
-      const div = document.createElement('div')
-      div.style.minHeight = '12rem';
-      div.innerHTML = `
-        <div class="question">
-          <span class='d-inline me-1'><img src='https://res.cloudinary.com/dzqufw45x/image/upload/v1709628292/user_jqbsp1.png' class='img-fluid rounded-circle' style='width: 25px;'></span>
-          <h6 class='d-inline text-light fs-5 fw-bold'>You</h6>
-          <p style='margin-left: 2.2rem; font-size: 18px !important; word-spacing: -5px; color: rgba(205, 202, 202, 0.9);'>${questionInput.value}</p>
-        </div>
-        <div class="answer fs-6 mt-4
-        " style="overflow-wrap: break-word;">
-          <span class='d-inline me-1'><img src='https://res.cloudinary.com/dzqufw45x/image/upload/v1709628292/logo_waq1jg.png' class='img-fluid' style='width: 25px;'></span>
-          <h6 class='d-inline text-light fs-5 fw-bold'>Kam Chat</h6>
-          <div class="d-block ms-4 sppiner spinner-grow" role="status" style="width: 16px; height: 16px">
-            <span class="d-inline visually-hidden">Loading...</span>
-          </div>
-          <pre style='margin-left: 2rem; text-wrap: wrap; font-size: 16px !important; word-spacing: -5px; color: rgba(205, 202, 202, 0.9);'></pre>
-        </div>
-        `;
+      const userMessageText = questionInput.value.trim();
+      if (!userMessageText) return;
 
-      qesAnsWrapper.appendChild(div);
-      window.scrollTo(0, (document.body.scrollHeight + 500));
+      const currentTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-      postData("/message", { input: questionInput.value })
+      // User message
+      const userMessageContainer = document.createElement('div');
+      userMessageContainer.classList.add('message-container', 'user-container', 'd-flex', 'justify-content-end');
+      userMessageContainer.innerHTML = `
+        <div class="message-bubble user-message">
+            <h6 class='fw-bold fs-6 mb-1'>You</h6>
+            <p class='mb-1' style="color: white;">${userMessageText}</p>
+            <div class='text-end time-stamp'>${currentTime}</div>
+        </div>
+      `;
+      qesAnsWrapper.appendChild(userMessageContainer);
+
+      // Bot message placeholder with spinner
+      const botMessageContainer = document.createElement('div');
+      botMessageContainer.classList.add('message-container', 'bot-container', 'd-flex', 'justify-content-start');
+      botMessageContainer.innerHTML = `
+        <div class="message-bubble bot-message">
+            <h6 class='fw-bold fs-6 mb-1'>Kam Chat</h6>
+            <div class="bot-response-content">
+               <div class="sppiner spinner-grow spinner-grow-sm" role="status" style="width: 16px; height: 16px; display: inline-block; vertical-align: middle;">
+                 <span class="visually-hidden">Loading...</span>
+               </div>
+               <pre class='mb-1' style='font-size: 16px; display: inline-block; vertical-align: middle;'></pre> <!-- Removed word-spacing, text-wrap is handled by CSS -->
+            </div>
+            <div class='text-end time-stamp'>${currentTime}</div>
+        </div>
+      `;
+      qesAnsWrapper.appendChild(botMessageContainer);
+
+      scrollHandle(); // Scroll after adding user and placeholder bot message
+
+      postData("/message", { input: userMessageText })
         .then(async (data) => {
           let resData = await data;
-          if (data.message) {
-            let wrapper = qesAnsWrapper.lastElementChild.lastElementChild;
-            let sppiner = wrapper.querySelector('.sppiner');
-            sppiner.classList.remove('d-block')
-            sppiner.classList.add('d-none')
+          const botTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          
+          // Update bot message with actual response
+          const lastBotMessageContainer = qesAnsWrapper.querySelector('.bot-container:last-child');
+          if (lastBotMessageContainer) {
+            const spinner = lastBotMessageContainer.querySelector('.sppiner');
+            const preElement = lastBotMessageContainer.querySelector('pre');
+            const timeStampElement = lastBotMessageContainer.querySelector('.time-stamp');
 
+            if (spinner) spinner.style.display = 'none';
+            if (timeStampElement) timeStampElement.textContent = botTime;
+            
+            if (resData.message) {
+                displayResponse(resData.message, preElement);
+            } else {
+                if(preElement) preElement.textContent = "Sorry, something went wrong.";
+            }
           }
           questionInput.value = null;
           submitBtn.classList.add('disabled');
-          displayResponse(resData)
         });
     })
 
-    async function displayResponse(data) {
-      let response = data.message;
-      const outputElement = document.querySelector('.qesAnsWrapper').lastElementChild.lastElementChild.lastElementChild;
+    async function displayResponse(response, outputElement) {
+      // const outputElement = document.querySelector('.qesAnsWrapper').lastElementChild.lastElementChild.lastElementChild; // This needs to be more specific
       let words = response.split(' ');
       let index = 0;
 
