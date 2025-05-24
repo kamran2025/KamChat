@@ -1,4 +1,4 @@
-import OpenAI from 'openai';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 import express from 'express'
 import dotenv from 'dotenv';
 import path from 'path'
@@ -13,17 +13,40 @@ app.set('views', path.resolve('./views'))
 app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const model = genAI.getGenerativeModel({ model: "gemini-pro"});
 
 async function main(input) {
-  messages.push({ role: 'user', content: input })
-  const chatCompletion = await openai.chat.completions.create({
-    messages: messages,
-    model: 'gpt-3.5-turbo',
-  })
-  return chatCompletion.choices[0]?.message?.content
+  messages.push({ role: 'user', content: input });
+
+  // Transform messages for Gemini API
+  const geminiHistory = messages.slice(0, -1).map(msg => ({  // Exclude current user input for startChat history
+    role: msg.role === 'assistant' ? 'model' : msg.role,
+    parts: [{ text: msg.content }]
+  }));
+
+  try {
+    const chat = model.startChat({
+      history: geminiHistory,
+      // generationConfig: { // Optional: Add generation config if needed
+      //   maxOutputTokens: 100,
+      // }
+    });
+
+    const result = await chat.sendMessage(input);
+    const response = await result.response;
+    const text = response.text();
+
+    // Add bot's response to messages array
+    messages.push({ role: 'assistant', content: text });
+    return text;
+  } catch (error) {
+    console.error("Error calling Gemini API:", error);
+    // Fallback message or error handling
+    const fallbackMessage = "Sorry, I couldn't process that. Please try again.";
+    messages.push({ role: 'assistant', content: fallbackMessage}); // also add fallback to history
+    return fallbackMessage;
+  }
 }
 
 app.get('/', (req, res) => {
